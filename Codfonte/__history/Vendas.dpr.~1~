@@ -1,0 +1,30 @@
+program Vendas;
+
+uses
+  Vcl.Forms,
+  formPrincipal in 'formPrincipal.pas' {frmPrincipal},
+  DataModule in 'DataModule.pas' {Dm: TDataModule},
+  formClientes in 'formClientes.pas' {frmClientes},
+  formProdutos in 'formProdutos.pas' {frmProdutos},
+  formVendas in 'formVendas.pas' {frmVendas},
+  formVendasItens in 'formVendasItens.pas' {frmVendasItens},
+  formCons_Vendas in 'formCons_Vendas.pas' {frmCons_Vendas},
+  formCons_Clientes in 'formCons_Clientes.pas' {frmCons_Clientes},
+  formCons_Produtos in 'formCons_Produtos.pas' {frmCons_Produtos};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TDm, Dm);
+
+  Application.CreateForm(TfrmProdutos, frmProdutos);
+  Application.CreateForm(TfrmVendas, frmVendas);
+  Application.CreateForm(TfrmVendasItens, frmVendasItens);
+  Application.CreateForm(TfrmCons_Vendas, frmCons_Vendas);
+  Application.CreateForm(TfrmCons_Clientes, frmCons_Clientes);
+  Application.CreateForm(TfrmCons_Produtos, frmCons_Produtos);
+  Application.Run;
+end.

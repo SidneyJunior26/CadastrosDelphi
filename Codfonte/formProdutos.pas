@@ -1,0 +1,163 @@
+unit formProdutos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.DBCtrls, Vcl.StdCtrls, Vcl.Buttons, Vcl.Mask, Vcl.ExtCtrls,
+  Data.DB, Vcl.Imaging.jpeg;
+
+type
+  TfrmProdutos = class(TForm)
+    pnDados: TPanel;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    btnAdicionar: TBitBtn;
+    btnAlterar: TBitBtn;
+    btnExcluir: TBitBtn;
+    btnConfirmar: TBitBtn;
+    btnSair: TBitBtn;
+    btnCancelar: TBitBtn;
+    edtDescricao: TEdit;
+    Label1: TLabel;
+    DBEdit1: TDBEdit;
+    Label2: TLabel;
+    DBEdit2: TDBEdit;
+    Label3: TLabel;
+    DBEdit3: TDBEdit;
+    Label4: TLabel;
+    DBEdit4: TDBEdit;
+    Label5: TLabel;
+    DBEdit5: TDBEdit;
+    Label6: TLabel;
+    DBNavigator1: TDBNavigator;
+    Image1: TImage;
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure btnAdicionarClick(Sender: TObject);
+    procedure btnAlterarClick(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnExcluirClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure edtDescricaoChange(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    procedure Habilita(Tipo : Boolean);
+  public
+    { Public declarations }
+  end;
+
+var
+  frmProdutos: TfrmProdutos;
+  wCodProduto: string;
+
+implementation
+
+{$R *.dfm}
+
+uses DataModule;
+
+procedure TfrmProdutos.Habilita(Tipo : Boolean);
+Begin
+   btnAdicionar.Enabled := not Tipo;
+   btnAlterar.Enabled := not Tipo;
+   btnExcluir.Enabled := not Tipo;
+   btnSair.Enabled := not Tipo;
+
+   pnDados.Enabled := Tipo;
+   btnConfirmar.Enabled := Tipo;
+   btnCancelar.Enabled := Tipo;
+End;
+
+procedure TfrmProdutos.btnAdicionarClick(Sender: TObject);
+begin
+   Habilita(True);
+   Dm.tblProdutos.Append;
+   Dm.tblProdutos.Edit;
+end;
+
+procedure TfrmProdutos.btnAlterarClick(Sender: TObject);
+begin
+   Habilita(True);
+   Dm.tblProdutos.Edit;
+end;
+
+procedure TfrmProdutos.btnCancelarClick(Sender: TObject);
+begin
+   Dm.tblProdutos.Cancel;
+   Habilita(False);
+end;
+
+procedure TfrmProdutos.btnConfirmarClick(Sender: TObject);
+begin
+   Dm.tblProdutos.Post;
+   Dm.tblProdutos.ApplyUpdates;
+
+   Habilita(False);
+end;
+
+procedure TfrmProdutos.btnExcluirClick(Sender: TObject);
+begin
+   Dm.qSQL.Close;
+   Dm.qSQL.SQL.Clear;
+   Dm.qSQL.SQL.Add('SELECT Count(CodVenda) as CodVenda From VendasItens');
+   Dm.qSQL.SQL.Add('Where (CodProduto = :wCodProduto)');
+   Dm.qSQL.SQL.Add('and (CodVenda = CodVenda)');
+   Dm.qSQL.ParamByName('wCodProduto').AsInteger := Dm.tblProdutosCODINT.AsInteger;
+   Dm.qSQL.Open;
+
+   wCodProduto := Dm.qSQL.FieldByName('CodVenda').Value;
+
+   if wCodProduto <> '0' then
+        begin
+              Application.MessageBox('Produto vinculado a uma venda!', 'Aviso', MB_ICONERROR + mb_ok);
+              Exit;
+        end;
+
+   if (MessageBox(0, 'Deseja excluir esse produto?', 'Produtos', MB_ICONQUESTION or MB_YESNO) = idNo) then
+      Exit;
+
+   Dm.tblProdutos.Delete;
+   Dm.tblProdutos.ApplyUpdates;
+end;
+
+procedure TfrmProdutos.btnSairClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfrmProdutos.edtDescricaoChange(Sender: TObject);
+begin
+   Dm.tblProdutos.Locate('Descricao',edtDescricao.Text,[loCaseInsensitive, loPartialKey])
+end;
+
+procedure TfrmProdutos.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+     case key of
+     VK_F2: btnAdicionar.Click;
+     VK_F3: btnAlterar.Click;
+     VK_F4: btnConfirmar.Click;
+     VK_F5: btnCancelar.Click;
+     VK_F6: btnExcluir.Click;
+     VK_ESCAPE: btnSair.Click;
+     end;
+end;
+
+procedure TfrmProdutos.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = #13) then
+     begin
+		      Key:=#0;
+        Perform(WM_NextDlgCtl,0,0);
+     end;
+end;
+
+procedure TfrmProdutos.FormShow(Sender: TObject);
+begin
+   Habilita(False);
+end;
+
+end.

@@ -1,0 +1,29 @@
+program ProjetoDev;
+
+uses
+  Vcl.Forms,
+  formPrincipal in 'formPrincipal.pas' {frmPrincipal},
+  DataModule in 'DataModule.pas' {Dm: TDataModule},
+  formClientes in 'formClientes.pas' {frmClientes},
+  formProdutos in 'formProdutos.pas' {frmProdutos},
+  formVendas in 'formVendas.pas' {frmVendas},
+  formVendasItens in 'formVendasItens.pas' {frmVendasItens},
+  formConsultaVendas in 'formConsultaVendas.pas' {frmCons_Vendas},
+  formConsultaClientes in 'formConsultaClientes.pas' {frmCons_Clientes},
+  formConsultaProdutos in 'formConsultaProdutos.pas' {frmCons_Produtos};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmPrincipal, frmPrincipal);
+  Application.CreateForm(TDm, Dm);
+  Application.CreateForm(TfrmProdutos, frmProdutos);
+  Application.CreateForm(TfrmVendas, frmVendas);
+  Application.CreateForm(TfrmVendasItens, frmVendasItens);
+  Application.CreateForm(TfrmCons_Vendas, frmCons_Vendas);
+  Application.CreateForm(TfrmCons_Clientes, frmCons_Clientes);
+  Application.CreateForm(TfrmCons_Produtos, frmCons_Produtos);
+  Application.Run;
+end.

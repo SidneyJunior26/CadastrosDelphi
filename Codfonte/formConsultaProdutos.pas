@@ -1,0 +1,107 @@
+unit formConsultaProdutos;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls,
+  Vcl.Imaging.jpeg;
+
+type
+  TfrmCons_Produtos = class(TForm)
+    Panel1: TPanel;
+    Panel2: TPanel;
+    btnPesquisar: TBitBtn;
+    btnSair: TBitBtn;
+    btnLimpar: TBitBtn;
+    DBGrid1: TDBGrid;
+    btnImprimir: TBitBtn;
+    ckCodigo: TCheckBox;
+    edtCodigo: TEdit;
+    ckDescricao: TCheckBox;
+    edtDescricao: TEdit;
+    Image2: TImage;
+    Label1: TLabel;
+    Label2: TLabel;
+    procedure btnImprimirClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure btnPesquisarClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnLimparClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmCons_Produtos: TfrmCons_Produtos;
+
+implementation
+
+{$R *.dfm}
+
+uses DataModule;
+
+procedure TfrmCons_Produtos.btnImprimirClick(Sender: TObject);
+begin
+   Dm.frxReport1.LoadFromFile(ExtractFilePath(Application.ExeName)+'Relatorios\ConsProdutos.fr3');
+   Dm.frxReport1.ShowReport;
+end;
+
+procedure TfrmCons_Produtos.btnLimparClick(Sender: TObject);
+begin
+   Dm.qProdutos.Close;
+   ckDescricao.Checked := False;
+   ckCodigo.Checked := False;
+   edtDescricao.Text := '';
+   edtCodigo.Text := '';
+end;
+
+procedure TfrmCons_Produtos.btnPesquisarClick(Sender: TObject);
+begin
+   Dm.qProdutos.Close;
+   Dm.qProdutos.SQL.Clear;
+   Dm.qProdutos.SQL.Add('Select * from Produtos');
+   Dm.qProdutos.SQL.Add('Where CODINT is not null');
+
+   if ckCodigo.Checked then
+      Begin
+         Dm.qProdutos.SQL.Add('And (CODINT = :wCODINT)');
+         Dm.qProdutos.ParamByName('wCODINT').AsInteger := StrToInt(edtCodigo.Text);
+      End;
+
+   if ckDescricao.Checked then
+      Begin
+         Dm.qProdutos.SQL.Add('And (DESCRICAO like :wDESCRICAO)');
+         Dm.qProdutos.ParamByName('wDESCRICAO').AsString := '%'+edtDescricao.Text+'%';
+      End;
+
+   Dm.qProdutos.SQL.Add('Order by DESCRICAO');
+   Dm.qProdutos.Open;
+end;
+
+procedure TfrmCons_Produtos.btnSairClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfrmCons_Produtos.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   Dm.qProdutos.Close;
+end;
+
+procedure TfrmCons_Produtos.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+     case key of
+     VK_F2: btnPesquisar.Click;
+     VK_F3: btnLimpar.Click;
+     VK_F4: btnImprimir.Click;
+     VK_ESCAPE: btnSair.Click;
+     end;
+end;
+
+end.

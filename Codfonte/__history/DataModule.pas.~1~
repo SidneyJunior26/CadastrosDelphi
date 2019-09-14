@@ -1,0 +1,130 @@
+unit DataModule;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, FireDAC.Stan.Intf, FireDAC.Stan.Option, FireDAC.Stan.Error, FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def,
+  FireDAC.Stan.Pool, FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Phys.FB, FireDAC.Phys.FBDef, FireDAC.VCLUI.Wait, FireDAC.Stan.Param, FireDAC.DatS,
+  FireDAC.DApt.Intf, FireDAC.DApt, Data.DB, FireDAC.Comp.Client, FireDAC.Comp.DataSet, frxClass, frxDBSet, FireDAC.Comp.UI;
+
+type
+  TDm = class(TDataModule)
+    tblProdutos: TFDQuery;
+    uProdutos: TFDUpdateSQL;
+    dsProdutos: TDataSource;
+    tblVendas: TFDQuery;
+    uVendas: TFDUpdateSQL;
+    dsVendas: TDataSource;
+    tblProdutosCODINT: TIntegerField;
+    tblProdutosDESCRICAO: TStringField;
+    tblProdutosQTDE: TIntegerField;
+    tblProdutosVALOR_CUSTO: TBCDField;
+    tblProdutosVALOR_VENDA: TBCDField;
+    tblVendasCODVENDA: TIntegerField;
+    tblVendasDATA: TDateField;
+    tblVendasCODCLIENTE: TIntegerField;
+    tblVendasVALOR_BRUTO: TBCDField;
+    tblVendasDESCONTO: TBCDField;
+    tblVendasVALOR_TOTAL: TBCDField;
+    qClientes: TFDQuery;
+    dsQClientes: TDataSource;
+    qProdutos: TFDQuery;
+    dsQProdutos: TDataSource;
+    qClientesCODINT: TIntegerField;
+    qClientesNOME: TStringField;
+    qClientesENDERECO: TStringField;
+    qClientesBAIRRO: TStringField;
+    qClientesCIDADE: TStringField;
+    qClientesCEP: TStringField;
+    qClientesTELEFONE: TStringField;
+    qProdutosCODINT: TIntegerField;
+    qProdutosDESCRICAO: TStringField;
+    qProdutosQTDE: TIntegerField;
+    qProdutosVALOR_CUSTO: TBCDField;
+    qProdutosVALOR_VENDA: TBCDField;
+    dbVendas: TFDConnection;
+    transVendas: TFDTransaction;
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    tblClientes: TFDQuery;
+    uClientes: TFDUpdateSQL;
+    dsClientes: TDataSource;
+    tblClientesCODINT: TIntegerField;
+    tblClientesNOME: TStringField;
+    tblClientesENDERECO: TStringField;
+    tblClientesBAIRRO: TStringField;
+    tblClientesCIDADE: TStringField;
+    tblClientesCEP: TStringField;
+    tblClientesTELEFONE: TStringField;
+    tblVendasItens: TFDQuery;
+    uVendasItens: TFDUpdateSQL;
+    dsVendasItens: TDataSource;
+    tblVendasItensCODVENDA: TIntegerField;
+    tblVendasItensCODINT: TIntegerField;
+    tblVendasItensCODPRODUTO: TIntegerField;
+    tblVendasItensQTDE: TIntegerField;
+    tblVendasItensVALOR_UNITARIO: TBCDField;
+    tblVendasItensVALOR_TOTAL: TBCDField;
+    tblVendasLCliente: TStringField;
+    tblVendasItensLProduto: TStringField;
+    qSQL: TFDQuery;
+    dsqSQL: TDataSource;
+    frxReport1: TfrxReport;
+    frxDBDataset1: TfrxDBDataset;
+    frxDBProdutos: TfrxDBDataset;
+    qVendas: TFDQuery;
+    dsQVendas: TDataSource;
+    qVendasItens: TFDQuery;
+    dsQVendasItens: TDataSource;
+    qVendasCODVENDA: TIntegerField;
+    qVendasDATA: TDateField;
+    qVendasCODCLIENTE: TIntegerField;
+    qVendasVALOR_BRUTO: TBCDField;
+    qVendasDESCONTO: TBCDField;
+    qVendasVALOR_TOTAL: TBCDField;
+    qVendasLCLIENTE: TStringField;
+    qVendasItensCODVENDA: TIntegerField;
+    qVendasItensCODINT: TIntegerField;
+    qVendasItensCODPRODUTO: TIntegerField;
+    qVendasItensQTDE: TIntegerField;
+    qVendasItensVALOR_UNITARIO: TBCDField;
+    qVendasItensVALOR_TOTAL: TBCDField;
+    qVendasItensLPRODUTO: TStringField;
+    frxDBDataset2: TfrxDBDataset;
+    procedure DataModuleCreate(Sender: TObject);
+    procedure DataModuleDestroy(Sender: TObject);
+    procedure qVendasAfterScroll(DataSet: TDataSet);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Dm: TDm;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TDm.DataModuleCreate(Sender: TObject);
+begin
+   tblClientes.Open;
+   tblProdutos.Open;
+end;
+
+procedure TDm.DataModuleDestroy(Sender: TObject);
+begin
+   tblClientes.Close;
+   tblProdutos.Close;
+end;
+
+procedure TDm.qVendasAfterScroll(DataSet: TDataSet);
+begin
+   qVendasItens.Close;
+   qVendasItens.ParamByName('wCodVenda').AsInteger := qVendasCODVENDA.AsInteger;
+   qVendasItens.Open;
+end;
+
+end.

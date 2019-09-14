@@ -1,0 +1,145 @@
+unit formConsultaVendas;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids, Vcl.StdCtrls, Vcl.Buttons, Vcl.ExtCtrls,
+  Vcl.Imaging.jpeg;
+
+type
+  TfrmCons_Vendas = class(TForm)
+    Panel1: TPanel;
+    Panel2: TPanel;
+    btnPesquisar: TBitBtn;
+    btnSair: TBitBtn;
+    btnLimpar: TBitBtn;
+    DBGrid1: TDBGrid;
+    DBGrid2: TDBGrid;
+    edtCodigo: TEdit;
+    ckData: TCheckBox;
+    edtDataDe: TEdit;
+    ckCliente: TCheckBox;
+    edtCliente: TEdit;
+    edtDataAte: TEdit;
+    Label1: TLabel;
+    btnImprimir: TBitBtn;
+    Splitter1: TSplitter;
+    Image2: TImage;
+    Image1: TImage;
+    ckCodigo: TCheckBox;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    procedure btnPesquisarClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnImprimirClick(Sender: TObject);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnLimparClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmCons_Vendas: TfrmCons_Vendas;
+
+implementation
+
+{$R *.dfm}
+
+uses DataModule;
+
+procedure TfrmCons_Vendas.btnImprimirClick(Sender: TObject);
+begin
+   Dm.frxReport1.LoadFromFile(ExtractFilePath(Application.ExeName)+'Relatorios\ConsVendas.fr3');
+   Dm.frxReport1.ShowReport;
+end;
+
+procedure TfrmCons_Vendas.btnLimparClick(Sender: TObject);
+begin
+   Dm.qVendas.Close;
+   Dm.qVendasItens.Close;
+   ckCodigo.Checked := False;
+   ckData.Checked := False;
+   ckCliente.Checked := False;
+   edtCodigo.Text := '';
+   edtDataDe.Text := '';
+   edtDataAte.Text := '';
+   edtCliente.Text := '';
+end;
+
+procedure TfrmCons_Vendas.btnPesquisarClick(Sender: TObject);
+begin
+   Dm.qVendas.Close;
+   Dm.qVendas.SQL.Clear;
+   Dm.qVendas.SQL.Add('select Vendas.*, Clientes.Nome as LCliente');
+   Dm.qVendas.SQL.Add('from Vendas');
+   Dm.qVendas.SQL.Add('Left Join Clientes on');
+   Dm.qVendas.SQL.Add('(Vendas.CodCliente = Clientes.CodInt)');
+   Dm.qVendas.SQL.Add('Where (Vendas.CodVenda is not null)');
+
+   if ckCodigo.Checked then
+      Begin
+         Dm.qVendas.SQL.Add('and (Vendas.CodVenda = :wCodVenda)');
+         Dm.qVendas.ParamByName('wCodVenda').AsInteger := StrToInt(edtCodigo.Text);
+         Dm.qVendas.SQL.Add('Order by Vendas.CodVenda');
+      End;
+
+   if ckData.Checked then
+      Begin
+         Dm.qVendas.SQL.Add('and (Vendas.Data between :wDataIni and :wDataFim)');
+         Dm.qVendas.ParamByName('wDataIni').AsDate := StrToDate(edtDataDe.Text);
+         Dm.qVendas.ParamByName('wDataFim').AsDate := StrToDate(edtDataAte.Text);
+         Dm.qVendas.SQL.Add('Order by Vendas.Data');
+      End;
+
+   if ckCliente.Checked then
+      Begin
+         Dm.qVendas.SQL.Add('and (Clientes.Nome like :wNome)');
+         Dm.qVendas.ParamByName('wNome').AsString := '%'+edtCliente.Text+'%';
+         Dm.qVendas.SQL.Add('Order by Clientes.Nome');
+      End;
+
+   Dm.qVendas.Open;
+
+end;
+
+procedure TfrmCons_Vendas.btnSairClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfrmCons_Vendas.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+   Dm.qVendas.Close;
+   Dm.qVendasItens.Close;
+end;
+
+procedure TfrmCons_Vendas.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+    if (Key = vk_F2) then
+     begin
+        btnPesquisar.Click;
+     end;
+
+    if (Key = vk_F3) then
+     begin
+        btnLimpar.Click;
+     end;
+
+     if (Key = vk_F4) then
+     begin
+        btnImprimir.Click;
+     end;
+
+     if (Key = vk_escape) then
+     begin
+        btnSair.Click;
+     end;
+end;
+
+end.

@@ -1,0 +1,174 @@
+unit formClientes;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.Buttons, Vcl.DBCtrls, Vcl.Mask, Vcl.ExtCtrls,
+  Data.DB, Vcl.Imaging.jpeg;
+
+type
+  TfrmClientes = class(TForm)
+    pnDados: TPanel;
+    Panel2: TPanel;
+    Panel3: TPanel;
+    edtNome: TEdit;
+    Label2: TLabel;
+    DBNavigator1: TDBNavigator;
+    btnAdicionar: TBitBtn;
+    btnAlterar: TBitBtn;
+    btnExcluir: TBitBtn;
+    btnConfirmar: TBitBtn;
+    btnSair: TBitBtn;
+    btnCancelar: TBitBtn;
+    Label1: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    Label5: TLabel;
+    Label6: TLabel;
+    Label7: TLabel;
+    Label8: TLabel;
+    DBEdit1: TDBEdit;
+    dbeNome: TDBEdit;
+    DBEdit3: TDBEdit;
+    DBEdit4: TDBEdit;
+    DBEdit5: TDBEdit;
+    DBEdit6: TDBEdit;
+    DBEdit7: TDBEdit;
+    Image1: TImage;
+    Image2: TImage;
+    Image3: TImage;
+    procedure edtNomeChange(Sender: TObject);
+    procedure btnAdicionarClick(Sender: TObject);
+    procedure btnAlterarClick(Sender: TObject);
+    procedure btnConfirmarClick(Sender: TObject);
+    procedure btnCancelarClick(Sender: TObject);
+    procedure btnExcluirClick(Sender: TObject);
+    procedure btnSairClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure FormKeyPress(Sender: TObject; var Key: Char);
+    procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+  private
+    procedure Habilita(Tipo : Boolean);
+  public
+    { Public declarations }
+  end;
+
+var
+  frmClientes: TfrmClientes;
+  wClienteVenda : integer;
+  wCodCliente: string;
+
+implementation
+
+{$R *.dfm}
+
+uses DataModule;
+
+procedure TfrmClientes.Habilita(Tipo : Boolean);
+Begin
+   btnAdicionar.Enabled := not Tipo;
+   btnAlterar.Enabled := not Tipo;
+   btnExcluir.Enabled := not Tipo;
+   btnSair.Enabled := not Tipo;
+
+   pnDados.Enabled := Tipo;
+   btnConfirmar.Enabled := Tipo;
+   btnCancelar.Enabled := Tipo;
+End;
+
+procedure TfrmClientes.btnAdicionarClick(Sender: TObject);
+begin
+   Habilita(True);
+   Dm.tblClientes.Append;
+   Dm.tblClientes.Edit;
+   dbeNome.SetFocus;
+end;
+
+procedure TfrmClientes.btnAlterarClick(Sender: TObject);
+begin
+   Habilita(True);
+   Dm.tblClientes.Edit;
+end;
+
+procedure TfrmClientes.btnCancelarClick(Sender: TObject);
+begin
+   Dm.tblClientes.Cancel;
+   Habilita(False);
+end;
+
+procedure TfrmClientes.btnConfirmarClick(Sender: TObject);
+begin
+   if dbeNome.Text = '' then
+   begin
+     Application.MessageBox('Por favor, informe um Nome', 'Erro', MB_ICONERROR + mb_ok);
+     Exit;
+   end;
+
+   Dm.tblClientes.Post;
+   Dm.tblClientes.ApplyUpdates;
+   Habilita(False);
+end;
+
+procedure TfrmClientes.btnExcluirClick(Sender: TObject);
+begin
+
+   if (MessageBox(0, 'Deseja excluir esse Cliente?', 'Clientes', MB_ICONQUESTION or MB_YESNO) = idNo) then
+      Exit;
+
+   wCodCliente := Dm.tblClientesCODINT.AsString;
+   wClienteVenda := Dm.tblClientes.SQL.Add('SELECT cli.'+wCodCliente+'FROM Clientes cli INNER JOIN Vendas ven ON cli.CodInt <> ven.CodCliente');
+
+   if wClienteVenda <> '' then
+   begin
+     Application.MessageBox('Cliente vinculado a uma venda. Não é possível a exclusão', 'Erro', MB_ICONERROR + mb_ok);
+     Exit;
+   end;
+
+
+
+   Dm.tblClientes.Delete;
+   Dm.tblClientes.ApplyUpdates;
+   Habilita(False);
+end;
+
+procedure TfrmClientes.btnSairClick(Sender: TObject);
+begin
+   Close;
+end;
+
+procedure TfrmClientes.edtNomeChange(Sender: TObject);
+begin
+   Dm.tblClientes.Locate('Nome',edtNome.Text,[loCaseInsensitive,loPartialKey]);
+end;
+
+procedure TfrmClientes.FormKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+
+     case key of
+     VK_F2: btnAdicionar.Click;
+     VK_F3: btnAlterar.Click;
+     VK_F4: btnConfirmar.Click;
+     VK_F5: btnCancelar.Click;
+     VK_F6: btnExcluir.Click;
+     VK_ESCAPE: btnSair.Click;
+
+     end;
+end;
+
+procedure TfrmClientes.FormKeyPress(Sender: TObject; var Key: Char);
+begin
+  if (Key = #13) then
+     begin
+		      Key:=#0;
+        Perform(WM_NextDlgCtl,0,0);
+     end;
+end;
+
+procedure TfrmClientes.FormShow(Sender: TObject);
+begin
+   Habilita(False);
+end;
+
+end.
